@@ -1,0 +1,1167 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>財務狀況表分類測驗</title>
+  <!-- 載入 Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- 載入 Google Fonts：Inter、JetBrains Mono 與 Noto Sans TC 以確保中英數最佳排版 -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;600;700&family=Noto+Sans+TC:wght@400;500;600;700;900&display=swap" rel="stylesheet" />
+
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['"Inter"', '"Noto Sans TC"', 'sans-serif'],
+            mono: ['"JetBrains Mono"', '"Noto Sans TC"', 'monospace'],
+          },
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              200: '#c7d2fe',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+              900: '#312e81',
+            },
+          },
+        },
+      },
+    };
+  </script>
+
+  <style>
+    /* 科技感網格背景與細膩光暈 */
+    body {
+      background-color: #f8fafc;
+      background-image:
+        radial-gradient(at 15% 10%, rgba(99, 102, 241, 0.08) 0px, transparent 50%),
+        radial-gradient(at 85% 90%, rgba(14, 165, 233, 0.08) 0px, transparent 50%),
+        linear-gradient(to right, rgba(148, 163, 184, 0.08) 1px, transparent 1px),
+        linear-gradient(to bottom, rgba(148, 163, 184, 0.08) 1px, transparent 1px);
+      background-size: 100% 100%, 100% 100%, 28px 28px, 28px 28px;
+    }
+
+    /* 畫面切換進場動畫 */
+    @keyframes fadeSlideUp {
+      from {
+        opacity: 0;
+        transform: translateY(14px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .animate-screen-in {
+      animation: fadeSlideUp 0.38s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    }
+
+    /* 答對微幅彈跳動畫 */
+    @keyframes popSuccess {
+      0% { transform: scale(1); }
+      40% { transform: scale(1.018); }
+      100% { transform: scale(1); }
+    }
+
+    .animate-pop {
+      animation: popSuccess 0.32s ease-out;
+    }
+
+    /* 答錯輕微震動動畫 */
+    @keyframes shakeError {
+      0%, 100% { transform: translateX(0); }
+      20% { transform: translateX(-6px); }
+      40% { transform: translateX(6px); }
+      60% { transform: translateX(-4px); }
+      80% { transform: translateX(4px); }
+    }
+
+    .animate-shake {
+      animation: shakeError 0.35s ease-in-out;
+    }
+
+    /* 提示區塊展開動畫 */
+    @keyframes expandHint {
+      from {
+        opacity: 0;
+        transform: translateY(-6px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .animate-hint {
+      animation: expandHint 0.25s ease-out forwards;
+    }
+  </style>
+</head>
+<body class="min-h-screen text-slate-800 antialiased flex flex-col selection:bg-indigo-100 selection:text-indigo-900">
+
+  <!-- 頂部導覽列 -->
+  <header class="sticky top-0 z-30 bg-white/80 backdrop-blur-md border-b border-slate-200/80">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+      <!-- 品牌識別與主標題 -->
+      <button
+        type="button"
+        id="nav-logo-btn"
+        onclick="confirmReturnHome()"
+        class="flex items-center gap-2.5 text-left group focus:outline-none"
+        title="返回首頁"
+      >
+        <div class="w-9 h-9 rounded-xl bg-gradient-to-br from-indigo-600 to-sky-500 text-white flex items-center justify-center shadow-sm shadow-indigo-500/20 group-hover:scale-105 transition-transform">
+          <!-- 網路分層堆疊 SVG 圖示 -->
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
+          </svg>
+        </div>
+        <div>
+          <span class="font-bold text-slate-900 tracking-tight text-base sm:text-lg block leading-none">財務狀況表分類測驗</span>
+          <span class="text-[11px] font-mono text-slate-400 tracking-wider uppercase hidden sm:inline-block mt-0.5">Financial Position Classification Challenge</span>
+        </div>
+      </button>
+
+      <!-- 右側工具區（音效開關與返回首頁） -->
+      <div class="flex items-center gap-2">
+        <button
+          type="button"
+          id="sound-toggle-btn"
+          onclick="toggleSound()"
+          class="p-2.5 rounded-xl text-slate-500 hover:text-indigo-600 hover:bg-indigo-50/70 transition-colors focus:outline-none"
+          aria-label="切換音效"
+          title="切換回饋音效"
+        >
+          <!-- 音效開啟圖示 -->
+          <svg id="icon-sound-on" class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z" />
+          </svg>
+          <!-- 音效靜音圖示 -->
+          <svg id="icon-sound-off" class="w-5 h-5 hidden text-slate-400" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15zM17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2" />
+          </svg>
+        </button>
+
+        <button
+          type="button"
+          id="nav-home-btn"
+          onclick="goHome()"
+          class="hidden text-xs sm:text-sm font-medium px-3 py-2 rounded-xl text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors"
+        >
+          返回首頁
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- 主要內容區 -->
+  <main class="flex-1 w-full max-w-3xl mx-auto px-4 sm:px-6 py-6 sm:py-10 flex flex-col justify-center">
+
+    <!-- ========================================================= -->
+    <!-- 畫面一：首頁 (Home Screen)                                 -->
+    <!-- ========================================================= -->
+    <section id="screen-home" class="animate-screen-in">
+      <div class="bg-white/95 backdrop-blur-sm rounded-3xl shadow-xl shadow-slate-200/60 border border-slate-200/80 p-6 sm:p-10 text-center relative overflow-hidden">
+        <!-- 頂部裝飾光條 -->
+        <div class="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-indigo-600 via-sky-500 to-teal-400"></div>
+
+        <!-- 科技標籤 -->
+        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-indigo-50 border border-indigo-100 text-indigo-700 text-xs sm:text-sm font-semibold mb-5">
+          <span class="w-2 h-2 rounded-full bg-indigo-500 animate-pulse"></span>
+          財務狀況表應計項目實戰測驗
+        </div>
+
+        <!-- 主標題 -->
+        <h1 class="text-3xl sm:text-5xl font-black text-slate-900 tracking-tight mb-4">
+          財務狀況表分類測驗
+        </h1>
+
+        <p class="text-slate-600 text-sm sm:text-base max-w-xl mx-auto leading-relaxed mb-8">
+          測試您對財務狀況表應計項目的熟悉度！根據題目給出的帳戶性質，精準判斷其所屬的分類。
+        </p>
+
+        <!-- 測驗與計分規則卡片 -->
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-3.5 sm:gap-4 text-left mb-8">
+          <!-- 規則 1 -->
+          <div class="p-4 rounded-2xl bg-slate-50/90 border border-slate-200/70 flex flex-col justify-between">
+            <div class="w-9 h-9 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center mb-3">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+              </svg>
+            </div>
+            <div>
+              <h2 class="font-bold text-slate-900 text-sm sm:text-base mb-1">隨機 5 題不重複分類</h2>
+              <p class="text-xs sm:text-sm text-slate-500 leading-relaxed">
+                每次從題庫隨機抽選 <strong class="text-slate-700">5 道題目</strong>，且<strong class="text-slate-700">每個分類所屬項目最多出現一次</strong>。
+              </p>
+            </div>
+          </div>
+
+          <!-- 規則 2 -->
+          <div class="p-4 rounded-2xl bg-slate-50/90 border border-slate-200/70 flex flex-col justify-between">
+            <div class="w-9 h-9 rounded-xl bg-emerald-100 text-emerald-600 flex items-center justify-center mb-3">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+            </div>
+            <div>
+              <h2 class="font-bold text-slate-900 text-sm sm:text-base mb-1">提示動態計分制</h2>
+              <p class="text-xs sm:text-sm text-slate-500 leading-relaxed">
+                未看提示答對得 <strong class="text-emerald-600">2 分</strong>；查看提示後答對得 <strong class="text-amber-600">1 分</strong>；答錯或跳過得 <strong class="text-slate-700">0 分</strong>。
+              </p>
+            </div>
+          </div>
+
+          <!-- 規則 3 -->
+          <div class="p-4 rounded-2xl bg-slate-50/90 border border-slate-200/70 flex flex-col justify-between">
+            <div class="w-9 h-9 rounded-xl bg-sky-100 text-sky-600 flex items-center justify-center mb-3">
+              <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+            </div>
+            <div>
+              <h2 class="font-bold text-slate-900 text-sm sm:text-base mb-1">滿分 10 分即時解析</h2>
+              <p class="text-xs sm:text-sm text-slate-500 leading-relaxed">
+                作答立即顯示正誤回饋，結算時提供完整答題紀錄與各題正解回顧。
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 速覽徽章列 -->
+        <div class="mb-8">
+          <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2.5">涵蓋財務狀況表應計項目</p>
+          <div class="flex flex-wrap justify-center gap-1.5 sm:gap-2">
+            <span class="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600 text-xs font-medium">1. Intangible assets</span>
+            <span class="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600 text-xs font-medium">2. Property, plant, and equipment</span>
+            <span class="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600 text-xs font-medium">3. Long-term investments</span>
+            <span class="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600 text-xs font-medium">4. Current assets</span>
+            <span class="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600 text-xs font-medium">5. Equity</span>
+            <span class="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600 text-xs font-medium">6. Non-current liabilities</span>
+            <span class="px-2.5 py-1 rounded-lg bg-slate-100 text-slate-600 text-xs font-medium">7. Current liabilities</span>
+          </div>
+        </div>
+
+        <!-- 開始測驗按鈕 -->
+        <button
+          type="button"
+          id="start-quiz-btn"
+          onclick="startQuiz()"
+          class="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-8 py-4 rounded-2xl bg-gradient-to-r from-indigo-600 to-sky-600 hover:from-indigo-500 hover:to-sky-500 active:scale-[0.99] text-white font-bold text-base sm:text-lg shadow-lg shadow-indigo-500/25 transition-all cursor-pointer"
+        >
+          <span>開始測驗</span>
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+          </svg>
+        </button>
+      </div>
+    </section>
+
+    <!-- ========================================================= -->
+    <!-- 畫面二：測驗畫面 (Quiz Screen)                             -->
+    <!-- ========================================================= -->
+    <section id="screen-quiz" class="hidden">
+      <!-- 頂部資訊列：題號、進度條、累計總分、本題可得配分 -->
+      <div class="bg-white/95 backdrop-blur-sm rounded-2xl shadow-sm border border-slate-200/80 p-4 sm:p-5 mb-4">
+        <div class="flex flex-wrap items-center justify-between gap-2 mb-3">
+          <div class="flex items-center gap-2.5">
+            <span id="quiz-progress-text" class="text-sm sm:text-base font-extrabold text-slate-800">
+              第 1 / 5 題
+            </span>
+            <span id="quiz-point-badge" class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 transition-colors">
+              本題配分：2 分
+            </span>
+          </div>
+
+          <div class="flex items-center gap-1.5 text-sm font-bold text-indigo-700 bg-indigo-50 px-3 py-1 rounded-xl border border-indigo-100">
+            <svg class="w-4 h-4 text-indigo-500" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+            </svg>
+            <span>目前得分：<span id="quiz-current-score" class="font-mono text-base">0</span> 分</span>
+          </div>
+        </div>
+
+        <!-- 進度條 -->
+        <div class="w-full h-2.5 bg-slate-100 rounded-full overflow-hidden">
+          <div
+            id="quiz-progress-bar"
+            class="h-full bg-gradient-to-r from-indigo-600 to-sky-500 rounded-full transition-all duration-500 ease-out"
+            style="width: 20%"
+          ></div>
+        </div>
+      </div>
+
+      <!-- 題目主卡片 -->
+      <div id="question-card" class="bg-white/95 backdrop-blur-sm rounded-3xl shadow-lg shadow-slate-200/50 border border-slate-200/80 p-5 sm:p-7 mb-4 transition-all">
+        <div class="flex items-center justify-between gap-2 mb-2">
+          <span class="text-xs font-semibold text-indigo-600 uppercase tracking-wider">
+            請選出以下項目所屬的分類
+          </span>
+          <span class="hidden sm:inline-block text-xs text-slate-400">
+            支援鍵盤數字鍵 <kbd class="px-1.5 py-0.5 bg-slate-100 border border-slate-200 rounded text-slate-600 font-mono">1</kbd>–<kbd class="px-1.5 py-0.5 bg-slate-100 border border-slate-200 rounded text-slate-600 font-mono">8</kbd> 作答
+          </span>
+        </div>
+
+        <!-- 題目名稱 -->
+        <div class="my-3 sm:my-4 py-4 px-5 rounded-2xl bg-slate-900 text-white shadow-inner flex items-center justify-between gap-3">
+          <h2 id="question-item-text" class="font-mono text-xl sm:text-3xl font-bold tracking-tight break-words">
+            Cash
+          </h2>
+          <span class="shrink-0 text-xs font-mono px-2.5 py-1 rounded-lg bg-slate-800 text-sky-400 border border-slate-700">
+            ITEM
+          </span>
+        </div>
+
+        <!-- 提示區塊（預設隱藏） -->
+        <div id="hint-box" class="hidden mt-3 p-3.5 sm:p-4 rounded-2xl bg-amber-50/90 border border-amber-200/90 text-amber-950 animate-hint">
+          <div class="flex items-start gap-2.5">
+            <span class="shrink-0 w-6 h-6 rounded-lg bg-amber-200/80 text-amber-800 flex items-center justify-center mt-0.5">
+              <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+              </svg>
+            </span>
+            <div class="text-xs sm:text-sm leading-relaxed">
+              <span class="font-bold text-amber-900 block mb-0.5">提示說明（已使用提示，本題答對最高得 1 分）：</span>
+              <span id="hint-text" class="text-amber-800"></span>
+            </div>
+          </div>
+        </div>
+
+        <!-- 控制按鈕列：[查看提示] 與 [跳過] -->
+        <div class="mt-4 pt-3.5 border-t border-slate-100 flex flex-wrap items-center justify-between gap-2.5">
+          <button
+            type="button"
+            id="hint-btn"
+            onclick="revealHint()"
+            class="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200/80 transition-all cursor-pointer"
+          >
+            <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+            </svg>
+            <span id="hint-btn-label">查看提示</span>
+          </button>
+
+          <button
+            type="button"
+            id="skip-btn"
+            onclick="skipQuestion()"
+            class="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold bg-slate-100 hover:bg-slate-200/80 text-slate-600 hover:text-slate-800 transition-all cursor-pointer"
+          >
+            <span>跳過</span>
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M13 5l7 7-7 7M5 5l7 7-7 7" />
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- 作答即時回饋橫幅（作答後顯示，可點擊立即下一題或等待 0.9 秒自動前進） -->
+      <div id="feedback-banner" class="hidden mb-4 p-4 rounded-2xl border flex items-center justify-between gap-3 animate-hint">
+        <div class="flex items-center gap-3">
+          <div id="feedback-icon" class="shrink-0 w-8 h-8 rounded-xl flex items-center justify-center"></div>
+          <div>
+            <p id="feedback-title" class="font-bold text-sm sm:text-base"></p>
+            <p id="feedback-subtitle" class="text-xs sm:text-sm opacity-90"></p>
+          </div>
+        </div>
+        <button
+          type="button"
+          id="next-now-btn"
+          onclick="advanceImmediately()"
+          class="shrink-0 px-3.5 py-2 rounded-xl text-xs sm:text-sm font-bold bg-white/90 hover:bg-white shadow-sm border border-black/10 transition-all cursor-pointer"
+        >
+          下一題 →
+        </button>
+      </div>
+
+      <!-- 7 個選項按鈕列表 -->
+      <div id="options-container" class="grid grid-cols-1 gap-2.5" role="group" aria-label="OSI 七層選項">
+        <!-- 由 JavaScript 動態渲染 1~7 層選項 -->
+      </div>
+    </section>
+
+    <!-- ========================================================= -->
+    <!-- 畫面三：結算畫面 (Result Screen)                           -->
+    <!-- ========================================================= -->
+    <section id="screen-result" class="hidden">
+      <!-- 總分與評語主卡片 -->
+      <div class="bg-white/95 backdrop-blur-sm rounded-3xl shadow-xl shadow-slate-200/60 border border-slate-200/80 p-6 sm:p-9 text-center mb-6 relative overflow-hidden">
+        <div class="absolute top-0 inset-x-0 h-1.5 bg-gradient-to-r from-indigo-600 via-sky-500 to-emerald-400"></div>
+
+        <p class="text-xs sm:text-sm font-bold text-indigo-600 uppercase tracking-wider mb-2">
+          測驗完成 · 成績結算
+        </p>
+
+        <!-- 總分醒目展示 -->
+        <div class="my-4 flex flex-col items-center justify-center">
+          <div class="inline-flex items-baseline justify-center gap-1.5 px-7 py-4 rounded-3xl bg-slate-900 text-white shadow-lg">
+            <span class="text-sm font-medium text-slate-400 mr-1">總分</span>
+            <span id="result-total-score" class="font-mono text-5xl sm:text-6xl font-black text-transparent bg-clip-text bg-gradient-to-r from-sky-400 to-emerald-400">
+              8
+            </span>
+            <span class="font-mono text-xl sm:text-2xl font-bold text-slate-400">/ 10 分</span>
+          </div>
+        </div>
+
+        <!-- 評語徽章 -->
+        <div id="result-badge" class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-bold mb-3">
+          <!-- 動態填入評語 -->
+        </div>
+
+        <p id="result-summary-text" class="text-slate-600 text-sm sm:text-base max-w-lg mx-auto mb-6">
+          <!-- 動態填入統計摘要 -->
+        </p>
+
+        <!-- 統計數據小卡 -->
+        <div class="grid grid-cols-3 gap-2.5 sm:gap-4 max-w-md mx-auto mb-7">
+          <div class="p-3 rounded-2xl bg-emerald-50/80 border border-emerald-100">
+            <div id="stat-correct" class="font-mono text-xl sm:text-2xl font-extrabold text-emerald-700">0</div>
+            <div class="text-xs font-medium text-emerald-800/80">答對題數</div>
+          </div>
+          <div class="p-3 rounded-2xl bg-amber-50/80 border border-amber-100">
+            <div id="stat-hints" class="font-mono text-xl sm:text-2xl font-extrabold text-amber-700">0</div>
+            <div class="text-xs font-medium text-amber-800/80">使用提示</div>
+          </div>
+          <div class="p-3 rounded-2xl bg-slate-100/90 border border-slate-200/80">
+            <div id="stat-wrong-skip" class="font-mono text-xl sm:text-2xl font-extrabold text-slate-700">0</div>
+            <div class="text-xs font-medium text-slate-600">答錯 / 跳過</div>
+          </div>
+        </div>
+
+        <!-- 重新測驗按鈕 -->
+        <button
+          type="button"
+          onclick="startQuiz()"
+          class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-8 py-3.5 rounded-2xl bg-gradient-to-r from-indigo-600 to-sky-600 hover:from-indigo-500 hover:to-sky-500 active:scale-[0.99] text-white font-bold text-base shadow-lg shadow-indigo-500/25 transition-all cursor-pointer"
+        >
+          <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          <span>重新測驗</span>
+        </button>
+      </div>
+
+      <!-- 詳細答題回顧列表 -->
+      <div class="mb-6">
+        <div class="flex items-center justify-between mb-3 px-1">
+          <h3 class="text-base sm:text-lg font-extrabold text-slate-800 flex items-center gap-2">
+            <span class="w-2 h-5 rounded-full bg-indigo-600 inline-block"></span>
+            詳細答題回顧（共 5 題）
+          </h3>
+          <span class="text-xs text-slate-500">含提示與正確層級解析</span>
+        </div>
+
+        <div id="review-list" class="space-y-3.5">
+          <!-- 由 JavaScript 動態產生 5 題詳細回顧卡片 -->
+        </div>
+      </div>
+
+      <!-- 底部操作按鈕列 -->
+      <div class="flex flex-col sm:flex-row items-center justify-center gap-3 pb-4">
+        <button
+          type="button"
+          onclick="startQuiz()"
+          class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-7 py-3.5 rounded-2xl bg-indigo-600 hover:bg-indigo-500 text-white font-bold text-sm sm:text-base shadow-md shadow-indigo-500/20 transition-all cursor-pointer"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2.2" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+          </svg>
+          <span>重新測驗</span>
+        </button>
+
+        <button
+          type="button"
+          onclick="goHome()"
+          class="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3.5 rounded-2xl bg-white hover:bg-slate-50 text-slate-700 font-semibold text-sm sm:text-base border border-slate-200 transition-all cursor-pointer"
+        >
+          返回首頁
+        </button>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- 頁尾 -->
+  <footer class="py-4 text-center text-xs text-slate-400">
+    Financial Position Classification Interactive Quiz · 每次隨機抽取 5 題不重複分類
+  </footer>
+
+  <!-- ========================================================= -->
+  <!-- JavaScript 核心邏輯                                        -->
+  <!-- ========================================================= -->
+  <script>
+    /**
+     * 一、完整題庫資料（原封不動保留題目、層級與提示文字）
+     */
+    const QUESTION_BANK = [
+      { item: "Patents", layer: 1, hint: "專利" },
+      { item: "Goodwill", layer: 1, hint: "商譽" },
+      { item: "Equipment", layer: 2, hint: "設備" },
+      { item: "Accumulated depreciation -- equipment", layer: 2, hint: "設備折舊" },
+      { item: "Share investment (long-term)", layer: 3, hint: "長期投資(通常是不動產)" },
+      { item: "Debt investment (short-term)", layer: 4, hint: "短期債務投資" },
+      { item: "Share capital -- ordinary", layer: 5, hint: "普通股股本" },
+      { item: "Mortgage payable (due in 3 years)", layer: 6, hint: "..." },
+      { item: "Salaries and wages payable", layer: 7, hint: "應付薪資" },
+      { item: "Interest payable", layer: 7, hint: "..." },
+      { item: "Unearned service revenue", layer: 7, hint: "未賺收入" },
+      { item: "Supplies", layer: 4, hint: "存貨" },
+      { item: "inventory", layer: 4, hint: "..." },
+      { item: "Notes receivable", layer: 4, hint: "..." },
+      { item: "Accounts receivable", layer: 4, hint: "..." },
+      { item: "Cash", layer: 4, hint: "現金" },
+      { item: "Land", layer: 2, hint: "土地(不會有折舊)" },
+      { item: "Revenue", layer: 8, hint: "收入" },
+      { item: "Expense", layer: 8, hint: "費用" },
+      { item: "Dividends", layer: 8, hint: "股利" },
+      { item: "Accounts payable", layer: 7, hint: "..." }
+    ];
+
+    /**
+     * 二、七層選項定義
+     */
+    const OSI_LAYERS = [
+      { id: 1, label: "Intangible assets (IA)" },
+      { id: 2, label: "Property, plant, and equipment (PPE)" },
+      { id: 3, label: "Long-term investments (LTI)" },
+      { id: 4, label: "Current assets (CA)" },
+      { id: 5, label: "Equity (E)" },
+      { id: 6, label: "Non-current liabilities (NCL)" },
+      { id: 7, label: "Current liabilities (CL)" },
+      { id: 8, label: "不會出現在財務狀況表 (NA)" }
+    ];
+
+    /**
+     * 三、全域測驗狀態管理
+     */
+    const TOTAL_QUESTIONS = 5;
+    const AUTO_ADVANCE_DELAY_MS = 900; // 答題後停留約 0.9 秒自動進入下一題
+
+    let state = {
+      currentScreen: 'home',   // 'home' | 'quiz' | 'result'
+      questions: [],           // 本次抽出的 5 道題目
+      currentIndex: 0,         // 目前題號索引 (0 ~ 4)
+      score: 0,                // 目前累計得分
+      hintUsed: false,         // 目前題目是否已查看提示
+      isAnsweringLocked: false,// 作答回饋期間鎖定重複點擊
+      autoAdvanceTimer: null,  // 自動進入下一題計時器 ID
+      records: [],             // 紀錄每題作答詳情，供結算畫面顯示
+      soundEnabled: true       // Web Audio 合成音效開關
+    };
+
+    /**
+     * 簡易 Web Audio API 合成回饋音效（無需外部音效檔案）
+     */
+    let audioCtx = null;
+
+    function playTone(type) {
+      if (!state.soundEnabled) return;
+      try {
+        if (!audioCtx) {
+          const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+          if (!AudioContextClass) return;
+          audioCtx = new AudioContextClass();
+        }
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+
+        const now = audioCtx.currentTime;
+        const osc = audioCtx.createOscillator();
+        const gain = audioCtx.createGain();
+        osc.connect(gain);
+        gain.connect(audioCtx.destination);
+
+        if (type === 'correct') {
+          // 清脆雙音上升和弦
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(523.25, now); // C5
+          osc.frequency.setValueAtTime(659.25, now + 0.09); // E5
+          gain.gain.setValueAtTime(0.12, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.32);
+          osc.start(now);
+          osc.stop(now + 0.32);
+        } else if (type === 'wrong') {
+          // 柔和低沉提示音
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(220, now);
+          osc.frequency.linearRampToValueAtTime(165, now + 0.22);
+          gain.gain.setValueAtTime(0.12, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.25);
+          osc.start(now);
+          osc.stop(now + 0.25);
+        } else if (type === 'hint') {
+          // 提示展開輕音
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(440, now);
+          osc.frequency.setValueAtTime(554.37, now + 0.07);
+          gain.gain.setValueAtTime(0.08, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.2);
+          osc.start(now);
+          osc.stop(now + 0.2);
+        } else if (type === 'skip') {
+          // 跳過滑音
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(360, now);
+          osc.frequency.linearRampToValueAtTime(280, now + 0.14);
+          gain.gain.setValueAtTime(0.07, now);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + 0.15);
+          osc.start(now);
+          osc.stop(now + 0.15);
+        }
+      } catch (e) {
+        // 忽略瀏覽器音訊限制錯誤，不影響測驗進行
+      }
+    }
+
+    function toggleSound() {
+      state.soundEnabled = !state.soundEnabled;
+      document.getElementById('icon-sound-on').classList.toggle('hidden', !state.soundEnabled);
+      document.getElementById('icon-sound-off').classList.toggle('hidden', state.soundEnabled);
+    }
+
+    /**
+     * Fisher-Yates 洗牌演算法：原地隨機打亂陣列並回傳新複本
+     */
+    function shuffleArray(array) {
+      const arr = [...array];
+      for (let i = arr.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [arr[i], arr[j]] = [arr[j], arr[i]];
+      }
+      return arr;
+    }
+
+    /**
+     * 抽題演算法：
+     * 1. 先將題庫依 layer (1~7) 分組
+     * 2. 隨機打亂可用的層級順序並選出其中 5 個不同的層級
+     * 3. 從這 5 個層級各自隨機抽出 1 道題目
+     * 4. 最後將這 5 道題目順序打亂，確保每層最多出現一次
+     */
+    function generateQuizQuestions() {
+      // 依 layer 分組
+      const groupedByLayer = {};
+      QUESTION_BANK.forEach((q) => {
+        if (!groupedByLayer[q.layer]) {
+          groupedByLayer[q.layer] = [];
+        }
+        groupedByLayer[q.layer].push(q);
+      });
+
+      // 取得所有存在題目的層級並隨機打亂，選出前 5 個不重複層級
+      const availableLayers = Object.keys(groupedByLayer).map(Number);
+      const selectedLayers = shuffleArray(availableLayers).slice(0, TOTAL_QUESTIONS);
+
+      // 從選出的 5 個層級中各隨機挑選 1 題
+      const pickedQuestions = selectedLayers.map((layerId) => {
+        const pool = groupedByLayer[layerId];
+        const randomIndex = Math.floor(Math.random() * pool.length);
+        return { ...pool[randomIndex] };
+      });
+
+      // 將最終 5 題順序再次隨機打亂
+      return shuffleArray(pickedQuestions);
+    }
+
+    /**
+     * 根據層級 ID 取得完整層級資訊
+     */
+    function getLayerInfo(layerId) {
+      return OSI_LAYERS.find((l) => l.id === layerId) || { id: layerId, label: ` ${layerId} ` };
+    }
+
+    /**
+     * 切換顯示畫面（home / quiz / result）
+     */
+    function switchScreen(screenName) {
+      clearAutoAdvanceTimer();
+      state.currentScreen = screenName;
+
+      const screens = ['home', 'quiz', 'result'];
+      screens.forEach((name) => {
+        const el = document.getElementById(`screen-${name}`);
+        if (name === screenName) {
+          el.classList.remove('hidden');
+          // 重新觸發進場動畫
+          el.classList.remove('animate-screen-in');
+          void el.offsetWidth;
+          el.classList.add('animate-screen-in');
+        } else {
+          el.classList.add('hidden');
+        }
+      });
+
+      // 導覽列「返回首頁」按鈕顯示控制
+      const navHomeBtn = document.getElementById('nav-home-btn');
+      if (screenName === 'home') {
+        navHomeBtn.classList.add('hidden');
+      } else {
+        navHomeBtn.classList.remove('hidden');
+      }
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function clearAutoAdvanceTimer() {
+      if (state.autoAdvanceTimer !== null) {
+        clearTimeout(state.autoAdvanceTimer);
+        state.autoAdvanceTimer = null;
+      }
+    }
+
+    function goHome() {
+      clearAutoAdvanceTimer();
+      state.isAnsweringLocked = false;
+      switchScreen('home');
+    }
+
+    function confirmReturnHome() {
+      if (state.currentScreen !== 'home') {
+        goHome();
+      }
+    }
+
+    /**
+     * 開始新測驗
+     */
+    function startQuiz() {
+      clearAutoAdvanceTimer();
+      state.questions = generateQuizQuestions();
+      state.currentIndex = 0;
+      state.score = 0;
+      state.hintUsed = false;
+      state.isAnsweringLocked = false;
+      state.records = [];
+
+      switchScreen('quiz');
+      renderCurrentQuestion();
+    }
+
+    /**
+     * 渲染目前題目畫面與 7 個選項
+     */
+    function renderCurrentQuestion() {
+      const currentQ = state.questions[state.currentIndex];
+      state.hintUsed = false;
+      state.isAnsweringLocked = false;
+
+      // 更新頂部進度與分數資訊
+      const qNum = state.currentIndex + 1;
+      document.getElementById('quiz-progress-text').textContent = `第 ${qNum} / ${TOTAL_QUESTIONS} 題`;
+      document.getElementById('quiz-current-score').textContent = state.score;
+      document.getElementById('quiz-progress-bar').style.width = `${(qNum / TOTAL_QUESTIONS) * 100}%`;
+
+      // 重設本題配分徽章為 2 分
+      updatePointBadge(2);
+
+      // 設定題目文字
+      const questionCard = document.getElementById('question-card');
+      questionCard.classList.remove('animate-pop', 'animate-shake');
+      document.getElementById('question-item-text').textContent = currentQ.item;
+
+      // 重設提示區塊與按鈕狀態
+      const hintBox = document.getElementById('hint-box');
+      hintBox.classList.add('hidden');
+      document.getElementById('hint-text').textContent = currentQ.hint;
+
+      const hintBtn = document.getElementById('hint-btn');
+      hintBtn.disabled = false;
+      hintBtn.className =
+        'inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold bg-amber-50 hover:bg-amber-100 text-amber-800 border border-amber-200/80 transition-all cursor-pointer';
+      document.getElementById('hint-btn-label').textContent = '查看提示';
+
+      // 啟用跳過按鈕
+      const skipBtn = document.getElementById('skip-btn');
+      skipBtn.disabled = false;
+      skipBtn.classList.remove('opacity-50', 'pointer-events-none');
+
+      // 隱藏作答回饋橫幅
+      document.getElementById('feedback-banner').classList.add('hidden');
+
+      // 渲染 1~8 層選項按鈕
+      const optionsContainer = document.getElementById('options-container');
+      optionsContainer.innerHTML = '';
+
+      OSI_LAYERS.forEach((layer) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.dataset.layerId = layer.id;
+        btn.onclick = () => handleOptionSelect(layer.id);
+        btn.className =
+          'option-btn group w-full text-left px-4 py-3.5 rounded-2xl bg-white hover:bg-indigo-50/70 border-2 border-slate-200/90 hover:border-indigo-400 shadow-xs transition-all duration-150 flex items-center justify-between gap-3 cursor-pointer focus:outline-none focus:ring-2 focus:ring-indigo-500/40';
+
+        btn.innerHTML = `
+          <div class="flex items-center gap-3.5 min-w-0">
+            <span class="layer-badge shrink-0 w-9 h-9 rounded-xl bg-slate-100 group-hover:bg-indigo-600 text-slate-700 group-hover:text-white font-mono font-bold text-sm flex items-center justify-center transition-colors">
+              ${layer.id}
+            </span>
+            <span class="layer-label font-semibold text-slate-800 group-hover:text-indigo-950 text-sm sm:text-base truncate">
+              ${layer.label}
+            </span>
+          </div>
+          <span class="status-tag shrink-0 text-xs font-bold px-2.5 py-1 rounded-lg hidden"></span>
+        `;
+
+        optionsContainer.appendChild(btn);
+      });
+    }
+
+    /**
+     * 更新頂部「本題配分」狀態徽章
+     */
+    function updatePointBadge(points) {
+      const badge = document.getElementById('quiz-point-badge');
+      if (points === 2) {
+        badge.textContent = '本題配分：2 分';
+        badge.className =
+          'inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 transition-colors';
+      } else {
+        badge.textContent = '本題配分：1 分';
+        badge.className =
+          'inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-amber-50 text-amber-700 border border-amber-200 transition-colors';
+      }
+    }
+
+    /**
+     * 點擊 [查看提示] 按鈕
+     */
+    function revealHint() {
+      if (state.isAnsweringLocked || state.hintUsed) return;
+
+      state.hintUsed = true;
+      playTone('hint');
+
+      // 展開提示內容
+      const hintBox = document.getElementById('hint-box');
+      hintBox.classList.remove('hidden');
+
+      // 更新配分為 1 分
+      updatePointBadge(1);
+
+      // 將按鈕切換為「已開啟提示」狀態
+      const hintBtn = document.getElementById('hint-btn');
+      hintBtn.className =
+        'inline-flex items-center gap-2 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold bg-amber-100 text-amber-900 border border-amber-300 cursor-default';
+      document.getElementById('hint-btn-label').textContent = '已查看提示';
+    }
+
+    /**
+     * 使用者選擇任一選項
+     */
+    function handleOptionSelect(selectedLayerId) {
+      if (state.isAnsweringLocked) return;
+      state.isAnsweringLocked = true;
+
+      const currentQ = state.questions[state.currentIndex];
+      const isCorrect = selectedLayerId === currentQ.layer;
+      const pointsEarned = isCorrect ? (state.hintUsed ? 1 : 2) : 0;
+
+      // 更新總分
+      state.score += pointsEarned;
+      document.getElementById('quiz-current-score').textContent = state.score;
+
+      // 記錄作答結果
+      state.records.push({
+        question: currentQ,
+        userLayerId: selectedLayerId,
+        skipped: false,
+        hintUsed: state.hintUsed,
+        isCorrect: isCorrect,
+        pointsEarned: pointsEarned
+      });
+
+      // 停用跳過與提示按鈕
+      const skipBtn = document.getElementById('skip-btn');
+      skipBtn.disabled = true;
+      skipBtn.classList.add('opacity-50', 'pointer-events-none');
+      document.getElementById('hint-btn').disabled = true;
+
+      // 更新 8 個選項按鈕的視覺狀態
+      const optionButtons = document.querySelectorAll('#options-container .option-btn');
+      optionButtons.forEach((btn) => {
+        const btnLayerId = Number(btn.dataset.layerId);
+        const badge = btn.querySelector('.layer-badge');
+        const tag = btn.querySelector('.status-tag');
+
+        btn.disabled = true;
+        btn.classList.remove('hover:bg-indigo-50/70', 'hover:border-indigo-400', 'cursor-pointer');
+        btn.classList.add('cursor-default');
+
+        if (btnLayerId === currentQ.layer) {
+          // 正確答案標示綠色
+          btn.classList.remove('bg-white', 'border-slate-200/90');
+          btn.classList.add('bg-emerald-50', 'border-emerald-500', 'ring-2', 'ring-emerald-500/20');
+          badge.classList.remove('bg-slate-100', 'text-slate-700');
+          badge.classList.add('bg-emerald-600', 'text-white');
+          tag.classList.remove('hidden');
+          tag.classList.add('bg-emerald-100', 'text-emerald-800');
+          tag.textContent = isCorrect ? `✓ 正確 (+${pointsEarned}分)` : '✓ 正確答案';
+        } else if (btnLayerId === selectedLayerId && !isCorrect) {
+          // 使用者選錯的選項標示紅色
+          btn.classList.remove('bg-white', 'border-slate-200/90');
+          btn.classList.add('bg-rose-50', 'border-rose-500', 'ring-2', 'ring-rose-500/20');
+          badge.classList.remove('bg-slate-100', 'text-slate-700');
+          badge.classList.add('bg-rose-600', 'text-white');
+          tag.classList.remove('hidden');
+          tag.classList.add('bg-rose-100', 'text-rose-800');
+          tag.textContent = '✕ 您的選擇';
+        } else {
+          // 其他未選選項降低透明度
+          btn.classList.add('opacity-55');
+        }
+      });
+
+      // 題目卡片動畫與音效回饋
+      const questionCard = document.getElementById('question-card');
+      if (isCorrect) {
+        playTone('correct');
+        questionCard.classList.add('animate-pop');
+      } else {
+        playTone('wrong');
+        questionCard.classList.add('animate-shake');
+      }
+
+      // 顯示作答回饋橫幅
+      showFeedbackBanner(isCorrect, pointsEarned, currentQ.layer);
+
+      // 約 0.9 秒後自動進入下一題（最後一題則進入結算畫面）
+      clearAutoAdvanceTimer();
+      state.autoAdvanceTimer = setTimeout(() => {
+        goToNextStep();
+      }, AUTO_ADVANCE_DELAY_MS);
+    }
+
+    /**
+     * 顯示即時回饋橫幅
+     */
+    function showFeedbackBanner(isCorrect, pointsEarned, correctLayerId) {
+      const banner = document.getElementById('feedback-banner');
+      const iconBox = document.getElementById('feedback-icon');
+      const titleEl = document.getElementById('feedback-title');
+      const subEl = document.getElementById('feedback-subtitle');
+      const nextBtn = document.getElementById('next-now-btn');
+
+      const correctLayer = getLayerInfo(correctLayerId);
+      const isLast = state.currentIndex >= TOTAL_QUESTIONS - 1;
+      nextBtn.textContent = isLast ? '查看結算 →' : '下一題 →';
+
+      banner.classList.remove(
+        'hidden',
+        'bg-emerald-50',
+        'border-emerald-200',
+        'text-emerald-900',
+        'bg-rose-50',
+        'border-rose-200',
+        'text-rose-900'
+      );
+
+      if (isCorrect) {
+        banner.classList.add('bg-emerald-50', 'border-emerald-200', 'text-emerald-900');
+        iconBox.className = 'shrink-0 w-8 h-8 rounded-xl bg-emerald-500 text-white flex items-center justify-center';
+        iconBox.innerHTML = `<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/></svg>`;
+        titleEl.textContent = `答對了！獲得 +${pointsEarned} 分`;
+        subEl.textContent = `正解為 ${correctLayer.id} ：${correctLayer.label}`;
+      } else {
+        banner.classList.add('bg-rose-50', 'border-rose-200', 'text-rose-900');
+        iconBox.className = 'shrink-0 w-8 h-8 rounded-xl bg-rose-500 text-white flex items-center justify-center';
+        iconBox.innerHTML = `<svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.5" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/></svg>`;
+        titleEl.textContent = '答錯了！獲得 0 分';
+        subEl.textContent = `正確答案是 ${correctLayer.id} ：${correctLayer.label}`;
+      }
+    }
+
+    /**
+     * 點擊 [跳過] 按鈕：記錄為「已跳過」、得 0 分並直接進入下一題
+     */
+    function skipQuestion() {
+      if (state.isAnsweringLocked) return;
+      state.isAnsweringLocked = true;
+      clearAutoAdvanceTimer();
+      playTone('skip');
+
+      const currentQ = state.questions[state.currentIndex];
+      state.records.push({
+        question: currentQ,
+        userLayerId: null,
+        skipped: true,
+        hintUsed: state.hintUsed,
+        isCorrect: false,
+        pointsEarned: 0
+      });
+
+      goToNextStep();
+    }
+
+    /**
+     * 手動點擊「下一題 →」立即前進
+     */
+    function advanceImmediately() {
+      clearAutoAdvanceTimer();
+      goToNextStep();
+    }
+
+    /**
+     * 前進至下一題或結算畫面
+     */
+    function goToNextStep() {
+      if (state.currentIndex < TOTAL_QUESTIONS - 1) {
+        state.currentIndex += 1;
+        renderCurrentQuestion();
+      } else {
+        renderResultScreen();
+      }
+    }
+
+    /**
+     * 渲染畫面三：結算畫面 (Result Screen)
+     */
+    function renderResultScreen() {
+      switchScreen('result');
+
+      const totalScore = state.score;
+      document.getElementById('result-total-score').textContent = totalScore;
+
+      // 計算各項統計數據
+      const correctCount = state.records.filter((r) => r.isCorrect).length;
+      const hintCount = state.records.filter((r) => r.hintUsed).length;
+      const wrongOrSkipCount = TOTAL_QUESTIONS - correctCount;
+
+      document.getElementById('stat-correct').textContent = `${correctCount} 題`;
+      document.getElementById('stat-hints').textContent = `${hintCount} 次`;
+      document.getElementById('stat-wrong-skip').textContent = `${wrongOrSkipCount} 題`;
+
+      // 依據總分顯示評語徽章與說明
+      const badgeEl = document.getElementById('result-badge');
+      const summaryEl = document.getElementById('result-summary-text');
+
+      if (totalScore === 10) {
+        badgeEl.className = 'inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-bold mb-3 bg-emerald-100 text-emerald-800 border border-emerald-200';
+        badgeEl.textContent = '🏆 滿分制霸 · 財務分類大師';
+        summaryEl.textContent = '太厲害了！未使用任何提示便全數精準命中，您對財務狀況分類的掌握無懈可擊！';
+      } else if (totalScore >= 8) {
+        badgeEl.className = 'inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-bold mb-3 bg-indigo-100 text-indigo-800 border border-indigo-200';
+        badgeEl.textContent = '🌟 表現優異 · 會計精熟專家';
+        summaryEl.textContent = '非常出色的成績！您已具備紮實的財務狀況分類觀念，距離滿分僅一步之遙。';
+      } else if (totalScore >= 5) {
+        badgeEl.className = 'inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-bold mb-3 bg-sky-100 text-sky-800 border border-sky-200';
+        badgeEl.textContent = '👍 穩健表現 · 會計概念良好';
+        summaryEl.textContent = '不錯的表現！透過下方回顧釐清各項目所屬分類，下次挑戰一定能拿更高分。';
+      } else {
+        badgeEl.className = 'inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-sm font-bold mb-3 bg-amber-100 text-amber-800 border border-amber-200';
+        badgeEl.textContent = '💡 持續精進 · 複習後再戰';
+        summaryEl.textContent = '別氣餒！建議先檢視下方每題的層級解析與提示說明，熟悉七種分類後再重新測驗。';
+      }
+
+      // 渲染 5 題詳細答題回顧卡片
+      const reviewList = document.getElementById('review-list');
+      reviewList.innerHTML = '';
+
+      state.records.forEach((rec, idx) => {
+        const correctLayer = getLayerInfo(rec.question.layer);
+        const userLayer = rec.userLayerId ? getLayerInfo(rec.userLayerId) : null;
+
+        // 狀態樣式設定
+        let cardBorderClass = 'border-slate-200/90';
+        let statusBadgeHTML = '';
+        let scoreBadgeHTML = '';
+
+        if (rec.isCorrect) {
+          cardBorderClass = 'border-emerald-200/90';
+          statusBadgeHTML = `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-xs font-bold bg-emerald-100 text-emerald-800">✓ 答對</span>`;
+          scoreBadgeHTML = `<span class="font-mono text-sm font-extrabold text-emerald-600">+${rec.pointsEarned} 分</span>`;
+        } else if (rec.skipped) {
+          cardBorderClass = 'border-slate-200/90';
+          statusBadgeHTML = `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-xs font-bold bg-slate-200/80 text-slate-700">↷ 已跳過</span>`;
+          scoreBadgeHTML = `<span class="font-mono text-sm font-extrabold text-slate-500">0 分</span>`;
+        } else {
+          cardBorderClass = 'border-rose-200/90';
+          statusBadgeHTML = `<span class="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-lg text-xs font-bold bg-rose-100 text-rose-800">✕ 答錯</span>`;
+          scoreBadgeHTML = `<span class="font-mono text-sm font-extrabold text-rose-600">0 分</span>`;
+        }
+
+        // 提示使用狀態標籤
+        const hintStatusBadge = rec.hintUsed
+          ? `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-amber-100 text-amber-800">已查看提示</span>`
+          : `<span class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-semibold bg-slate-100 text-slate-600">未查看提示</span>`;
+
+        // 使用者選擇顯示文字
+        let userAnswerDisplay = '';
+        if (rec.skipped) {
+          userAnswerDisplay = `<span class="text-slate-500 italic">已跳過（未作答）</span>`;
+        } else if (rec.isCorrect) {
+          userAnswerDisplay = `<span class="font-semibold text-emerald-700"> ${userLayer.id}  · ${userLayer.label}</span>`;
+        } else {
+          userAnswerDisplay = `<span class="font-semibold text-rose-600"> ${userLayer.id}  · ${userLayer.label}</span>`;
+        }
+
+        const itemCard = document.createElement('div');
+        itemCard.className = `bg-white/95 rounded-2xl shadow-xs border ${cardBorderClass} p-4 sm:p-5 transition-all`;
+        itemCard.innerHTML = `
+          <!-- 卡片標頭：題號、題目名稱、對錯與得分 -->
+          <div class="flex flex-wrap items-start justify-between gap-2 pb-3 border-b border-slate-100">
+            <div class="flex items-center gap-2.5 min-w-0">
+              <span class="shrink-0 w-7 h-7 rounded-lg bg-slate-900 text-white font-mono text-xs font-bold flex items-center justify-center">
+                Q${idx + 1}
+              </span>
+              <h4 class="font-mono font-bold text-base sm:text-lg text-slate-900 break-words">
+                ${rec.question.item}
+              </h4>
+            </div>
+            <div class="flex items-center gap-2.5 shrink-0">
+              ${hintStatusBadge}
+              ${statusBadgeHTML}
+              <span class="px-2.5 py-0.5 rounded-lg bg-slate-50 border border-slate-200/80">
+                ${scoreBadgeHTML}
+              </span>
+            </div>
+          </div>
+
+          <!-- 作答對照區 -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 my-3 text-xs sm:text-sm">
+            <div class="p-2.5 rounded-xl bg-slate-50/90 border border-slate-100">
+              <span class="text-slate-400 block text-[11px] font-semibold mb-0.5">您的選擇</span>
+              ${userAnswerDisplay}
+            </div>
+            <div class="p-2.5 rounded-xl bg-emerald-50/60 border border-emerald-100/80">
+              <span class="text-emerald-700/70 block text-[11px] font-semibold mb-0.5">正確答案</span>
+              <span class="font-semibold text-emerald-900"> ${correctLayer.id}  · ${correctLayer.label}</span>
+            </div>
+          </div>
+
+          <!-- 題目提示解析 -->
+          <div class="text-xs text-slate-600 bg-amber-50/50 border border-amber-100/80 rounded-xl px-3 py-2 flex items-start gap-2">
+            <span class="font-bold text-amber-800 shrink-0">提示：</span>
+            <span class="leading-relaxed text-slate-700">${rec.question.hint}</span>
+          </div>
+        `;
+
+        reviewList.appendChild(itemCard);
+      });
+    }
+
+    /**
+     * 鍵盤快捷鍵支援：在測驗畫面按 1~8 可快速選擇對應分層，按 H 可查看提示
+     */
+    document.addEventListener('keydown', (event) => {
+      if (state.currentScreen !== 'quiz' || state.isAnsweringLocked) return;
+
+      const key = event.key;
+      if (key >= '1' && key <= '8') {
+        event.preventDefault();
+        handleOptionSelect(Number(key));
+      } else if (key.toLowerCase() === 'h') {
+        event.preventDefault();
+        revealHint();
+      }
+    });
+  </script>
+</body>
+</html>
