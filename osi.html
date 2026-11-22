@@ -511,6 +511,9 @@
       { item: "IP", layer: 3, hint: "Internet Protocol，負責邏輯定址（IP位址）與跨網路封包路由選擇的核心協定。" },
       { item: "TCP (transmission control protocol)", layer: 4, hint: "提供連線導向、可靠且具備流量控制與錯誤重傳機制的端對端傳輸協定。" },
       { item: "UDP (user datagram protocol)", layer: 4, hint: "提供無連線、低延遲但不保證封包順序與重傳的快速傳輸協定。" },
+      { item: "IP分享器", layer: 4, hint: "分享網路位址，過程中會檢查傳輸層的封包。" },
+      { item: "Flow control", layer: 4, hint: "資料傳輸時進行流量控制。" },
+      { item: "Multiplexing", layer: 4, hint: "多工，允許主機建立多條網路連線。" },
       { item: "Router", layer: 3, hint: "路由器，依據網路層的邏輯位址（IP）決定封包最佳轉發路徑的設備。" },
       { item: "Encryption/Decryption", layer: 6, hint: "負責資料的格式轉換、壓縮與加密／解密，確保不同系統間資料可讀且安全。" },
       { item: "physical address", layer: 2, hint: "燒錄在網路介面卡（NIC）上的實體硬體位址，用於區域網路內識別裝置。" },
@@ -519,6 +522,7 @@
       { item: "Error Detection", layer: 2, hint: "透過循環冗餘校驗（CRC）等機制檢查訊框在鏈路傳輸過程中是否發生位元錯誤。" },
       { item: "NIC (network interface card)", layer: 2, hint: "網路卡，讓設備連上網路的基本裝置。" },
       { item: "Switch", layer: 2, hint: "交換器，具有連接埠學習的功能。" },
+      { item: "Bridge", layer: 2, hint: "橋接器，將多個實體網路連接在一起。" },
       { item: "Hub", layer: 1, hint: "集線器，用於連接網路實體線路。" },
       { item: "Repeater", layer: 1, hint: "中繼器，用於延長實體線路，並增強訊號。" },
       { item: "ISM band", layer: 1, hint: "工業、科學與醫療用無線電頻段（如 2.4GHz、5GHz），屬於無線電波訊號傳輸媒介。" }
